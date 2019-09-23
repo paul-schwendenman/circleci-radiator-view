@@ -157,6 +157,7 @@ var circleBackend = function(settings, resultCallback) {
       var builds = data.reduce(function(acc, repository) {
          return acc.concat(Object.keys(repository.branches).map(function(branchName) {
             var branch = repository.branches[branchName]
+            if (!(branch.running_builds || branch.recent_builds)) return null
             var buildIsRunning = branch.running_builds.length != 0
             var build = buildIsRunning ? branch.running_builds[0] : branch.recent_builds[0]
             var status = buildIsRunning ? build.status : build.outcome
@@ -171,7 +172,7 @@ var circleBackend = function(settings, resultCallback) {
                   hash: build.vcs_revision
                },
             }
-         }))
+         }).filter(function(b) {return b != null}))
       }, [])
       resultCallback(undefined, builds)
    }, {
