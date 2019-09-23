@@ -34,10 +34,10 @@
     border-top: 0;
   }
   .success, .fixed, .passed {
-    background-color: #42c88a;
+    background-color: #3EC300;
   }
   .failed, .infrastructure_fail, .timedout, .errored  {
-    background-color: #ed5c5c;
+    background-color: #D11812;
   }
   .not_running, .queued, .scheduled, .canceled {
     background-color: #ab7fd1;
@@ -176,8 +176,8 @@
 
       header.textContent = name
       description.textContent = `
-      ${time.getDate()}.${time.getMonth() + 1}.${time.getFullYear()}
-      ${time.toString().replace(/.*(\d{2}:\d{2}):(\d{2}).*/, '$1')}
+      ${time.getFullYear()}-${(time.getMonth() + 1).toString().padStart(2, '0')}-${time.getDate().toString().padStart(2, '0')}
+      ${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}
       `
       author.innerHTML = authorName
 

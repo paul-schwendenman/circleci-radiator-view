@@ -154,25 +154,36 @@ var circleBackend = function(settings, resultCallback) {
       if (err) {
          return resultCallback(err)
       }
-      var builds = data.reduce(function(acc, repository) {
-         return acc.concat(Object.keys(repository.branches).map(function(branchName) {
-            var branch = repository.branches[branchName]
-            var buildIsRunning = branch.running_builds.length != 0
-            var build = buildIsRunning ? branch.running_builds[0] : branch.recent_builds[0]
-            var status = buildIsRunning ? build.status : build.outcome
+      var builds = data.flatMap(function(repository) {
+            return Object.entries(repository.branches).map(function([branchName, branch]) {
+               return {'repoName': repository.reponame, 'branchName': branchName, 'branch': branch}
+            })})
+         .filter(function({repoName, branchName, branch}) {
+            var keys = Object.keys(branch)
+            return keys.includes('running_builds') || keys.includes('recent_builds')
+         })
+         .map(function({repoName, branchName, branch}) {
+            var build, status
+            if (branch.running_builds.length === 0) {
+               build = branch.recent_builds[0]
+               status = build.outcome
+            } else {
+               build = branch.running_builds[0]
+               status = build.status
+            }
+            var buildDate = new Date(build.pushed_at)
             return {
-               repository: repository.reponame,
+               repository: repoName,
                branch: branchName,
-               started: new Date(build.pushed_at),
+               started: buildDate,
                state: status,
                commit: {
-                  created: new Date(build.pushed_at),
+                  created: buildDate,
                   author: null,
                   hash: build.vcs_revision
-               },
+               }
             }
-         }))
-      }, [])
+         })
       resultCallback(undefined, builds)
    }, {
       Accept: 'application/json'
